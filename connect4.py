@@ -23,7 +23,7 @@ YELLOW = (255,255,0)
 SQUARESIZE = 100
 RADIUS = int(SQUARESIZE/2 - 5)
 PIECE_COLOR = {0: BLACK, PLAYER_1: RED, PLAYER_2: YELLOW}
-FONT = pygame.font.SysFont("monospace", 75)
+FONT = pygame.font.SysFont("Monospace", 40)
 
 
 # Functions
@@ -104,16 +104,23 @@ def draw_board(board, screen):
         for row in range(board.shape[0]):
             pygame.draw.rect(screen,
                              BLUE,
-                             (col * SQUARESIZE, row * SQUARESIZE + SQUARESIZE,
+                             (col * SQUARESIZE, (NUMBER_ROWS - row) * SQUARESIZE,
                               SQUARESIZE,
                               SQUARESIZE))
             piece = board[row][col]
             pygame.draw.circle(screen,
                                PIECE_COLOR[piece],
-                               (int(col * SQUARESIZE + SQUARESIZE / 2),
-                                int(row * SQUARESIZE + SQUARESIZE + SQUARESIZE / 2)),
+                               (int((col + 1/2) * SQUARESIZE),
+                                int((NUMBER_ROWS + 1/2 - row) * SQUARESIZE)),
                                RADIUS)
     pygame.display.update()
+
+def get_screen():
+    width = NUMBER_COLS * SQUARESIZE
+    height = (NUMBER_ROWS + 1) * SQUARESIZE
+    size = (width, height)
+    screen = pygame.display.set_mode(size)
+    return screen
 
 
 def game(board):
@@ -121,10 +128,7 @@ def game(board):
     Game Connect4 implementation
     """
     width = NUMBER_COLS * SQUARESIZE
-    height = (NUMBER_ROWS + 1) * SQUARESIZE
-    size = (width, height)
-    screen = pygame.display.set_mode(size)
-
+    screen = get_screen()
     game_over = False
     draw_board(board, screen)
     turn = PLAYER_1
@@ -139,8 +143,6 @@ def game(board):
                                    PIECE_COLOR[turn],
                                    (posx, int(SQUARESIZE / 2)),
                                    RADIUS)
-            pygame.display.update()
-
             if event.type == pygame.MOUSEBUTTONDOWN:
                 pygame.draw.rect(screen, BLACK, (0,0, width, SQUARESIZE))
                 posx = event.pos[0]
@@ -160,6 +162,7 @@ def game(board):
                 else:
                     turn = PLAYER_1
 
+            pygame.display.update()
     pygame.time.wait(3000)
 
 
