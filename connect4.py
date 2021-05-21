@@ -1,15 +1,32 @@
 """
 CONNECT 4
 """
-
+import sys
+import math
+import pygame
 import numpy as np
 
+
+pygame.init()
+pygame.font.init()
+
+
+# Globals
 NUMBER_COLS = 7
 NUMBER_ROWS = 6
 PLAYER_1 = 1
 PLAYER_2 = 2
+BLUE = (0,0,255)
+BLACK = (0,0,0)
+RED = (255,0,0)
+YELLOW = (255,255,0)
+SQUARESIZE = 100
+RADIUS = int(SQUARESIZE/2 - 5)
+PIECE_COLOR = {0: BLACK, PLAYER_1: RED, PLAYER_2: YELLOW}
+FONT = pygame.font.SysFont("monospace", 75)
 
 
+# Functions
 def create_board():
     """
     Create our board.
@@ -40,14 +57,6 @@ def get_next_open_row(board, col):
     """
     rows = board[:, col]
     return np.where(rows == 0)[0][0]
-
-
-def print_board(board):
-    """
-    Print board
-    """
-    print(np.flip(board, 0))
-
 
 def has_winner(board, piece):
     """
@@ -87,37 +96,71 @@ def has_winner(board, piece):
     return False
 
 
+def draw_board(board, screen):
+    """
+    Draw board with pygame
+    """
+    for col in range(board.shape[1]):
+        for row in range(board.shape[0]):
+            pygame.draw.rect(screen,
+                             BLUE,
+                             (col * SQUARESIZE, row * SQUARESIZE + SQUARESIZE,
+                              SQUARESIZE,
+                              SQUARESIZE))
+            piece = board[row][col]
+            pygame.draw.circle(screen,
+                               PIECE_COLOR[piece],
+                               (int(col * SQUARESIZE + SQUARESIZE / 2),
+                                int(row * SQUARESIZE + SQUARESIZE + SQUARESIZE / 2)),
+                               RADIUS)
+    pygame.display.update()
+
+
 def game(board):
     """
     Game Connect4 implementation
     """
+    width = NUMBER_COLS * SQUARESIZE
+    height = (NUMBER_ROWS + 1) * SQUARESIZE
+    size = (width, height)
+    screen = pygame.display.set_mode(size)
+
     game_over = False
-    print_board(board)
+    draw_board(board, screen)
     turn = PLAYER_1
     while not game_over:
-        try:
-            print()
-            col  = int(input(f"Jogador {turn} escolha um lugar [0-6]: "))
-            if is_valid_location(board, col):
-                row = get_next_open_row(board, col)
-                drop_piece(board, row, col, turn)
-                print_board(board)
-            else:
-                print("Essa coluna não possui espaços disponíveis.")
-                print()
-                continue
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                sys.exit()
+            if event.type == pygame.MOUSEMOTION:
+                pygame.draw.rect(screen, BLACK, (0,0, width, SQUARESIZE))
+                posx = event.pos[0]
+                pygame.draw.circle(screen,
+                                   PIECE_COLOR[turn],
+                                   (posx, int(SQUARESIZE / 2)),
+                                   RADIUS)
+            pygame.display.update()
 
-            if has_winner(board, turn):
-                print(f"**** JOGADOR {turn} GANHOU ****")
-                game_over = True
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                pygame.draw.rect(screen, BLACK, (0,0, width, SQUARESIZE))
+                posx = event.pos[0]
+                col = int(math.floor(posx/SQUARESIZE))
+                if is_valid_location(board, col):
+                    row = get_next_open_row(board, col)
+                    drop_piece(board, row, col, turn)
 
-            if turn == PLAYER_1:
-                turn = PLAYER_2
-            else:
-                turn = PLAYER_1
-        except ValueError:
-            print("Escreva um número entre 0 e 6")
-            print()
+                if has_winner(board, turn):
+                    label = FONT.render(f"Jogador {turn} Venceu!!", 1, PIECE_COLOR[turn])
+                    screen.blit(label, (40,10))
+                    game_over = True
+
+                draw_board(board, screen)
+                if turn == PLAYER_1:
+                    turn = PLAYER_2
+                else:
+                    turn = PLAYER_1
+
+    pygame.time.wait(3000)
 
 
 if __name__ == "__main__":
