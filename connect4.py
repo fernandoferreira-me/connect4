@@ -115,7 +115,11 @@ def draw_board(board, screen):
                                RADIUS)
     pygame.display.update()
 
+
 def get_screen():
+    """
+    Get Screen
+    """
     width = NUMBER_COLS * SQUARESIZE
     height = (NUMBER_ROWS + 1) * SQUARESIZE
     size = (width, height)
@@ -152,7 +156,8 @@ def game(board):
                     drop_piece(board, row, col, turn)
 
                 if has_winner(board, turn):
-                    label = FONT.render(f"Jogador {turn} Venceu!!", 1, PIECE_COLOR[turn])
+                    label = FONT.render(f"Jogador {turn} Venceu!!", 1,
+                                        PIECE_COLOR[turn])
                     screen.blit(label, (40,10))
                     game_over = True
 
